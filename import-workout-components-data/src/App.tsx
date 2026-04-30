@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   copy, 
@@ -38,7 +38,6 @@ import {
   Clock,
   Brain
 } from "lucide-react";
-
 type Language = "en" | "es";
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
