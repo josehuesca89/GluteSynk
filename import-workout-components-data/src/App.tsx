@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { copy, ariKnowledgeBase, getAriResponse } from './AriLogic';
+import { 
+  copy, 
+  ariKnowledgeBase, 
+  getAriResponse, 
+  type WorkoutDay, 
+  type PlanVariant, 
+  type TrainingFrequency, 
+  type Exercise, 
+  type SetEntry, 
+  type GoalProgram, 
+  type Challenge, 
+  type ForumPost 
+} from './AriLogic';
 import {
   Dumbbell, 
   Apple, 
