@@ -36,8 +36,8 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-
 // Ari Voice Assistant Component
+type Language = "en" | "es";
 const AriVoiceAssistant = ({ lang }: { lang: Language }) => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
