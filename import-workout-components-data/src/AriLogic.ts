@@ -215,7 +215,7 @@ export const ariKnowledgeBase = {
 // diet types, body types, custom routines, motivation, and general wellness.
 // =============================================================================
 
-const getAriResponse = (input: string): string => {
+export const getAriResponse = (input: string): string => {
   const lower = input.toLowerCase();
   
   // =========================================================================
