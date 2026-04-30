@@ -39,7 +39,7 @@ import {
   Brain
 } from "lucide-react";
 
-const App = () => {
+type Language = "en" | "es";
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
   
