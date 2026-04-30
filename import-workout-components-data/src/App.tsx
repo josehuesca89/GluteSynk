@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import { copy, ariKnowledgeBase, getAriResponse } from './AriLogic';
+import {
   Dumbbell, 
   Apple, 
   Smartphone, 
