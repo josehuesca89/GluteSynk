@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  copy, 
-  ariKnowledgeBase, 
-  getAriResponse, 
-  type WorkoutDay, 
-  type PlanVariant, 
-  type TrainingFrequency, 
-  type Exercise, 
-  type SetEntry, 
-  type GoalProgram, 
-  type Challenge, 
-  type ForumPost 
+import {
+  copy,
+  ariKnowledgeBase,
+  getAriResponse,
+  type WorkoutDay,
+  type PlanVariant,
+  type TrainingFrequency,
+  type Exercise,
+  type SetEntry,
+  type GoalProgram,
+  type Challenge,
+  type ForumPost
 } from './AriLogic';
 import {
   Dumbbell, 
