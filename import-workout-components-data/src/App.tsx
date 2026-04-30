@@ -36,9 +36,9 @@ import {
   Sun,
   Moon,
   Clock,
-  Brain 
+  Brain
 } from "lucide-react";
-type Language = "en" | "es";
+
 const App = () => {
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
