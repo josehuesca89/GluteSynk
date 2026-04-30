@@ -13,32 +13,6 @@ import {
   type Challenge,
   type ForumPost
 } from './AriLogic';
-import {
-  Dumbbell, 
-  Apple, 
-  Smartphone, 
-  Heart, 
-  Share2, 
-  CheckCircle2, 
-  Zap, 
-  ShieldCheck,
-  ChevronRight,
-  Sparkles,
-  Coffee,
-  Scale,
-  Flame,
-  Activity,
-  Mic,
-  MicOff,
-  Volume2,
-  VolumeX,
-  Waves,
-  Sun,
-  Moon,
-  Clock,
-  Brain
-} from "lucide-react";
-type Language = "en" | "es";
 const App = () => {
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
