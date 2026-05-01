@@ -644,3 +644,23 @@ export const clientPrograms = [
     outcome: "Elite physique" 
   }
 ];
+export const trainingSchedules = {
+  beginner: {
+    title: "Beginner 3-Day Split",
+    description: "Focus on form and consistent glute activation."
+  },
+  intermediate: {
+    title: "Intermediate 5-Day Power",
+    description: "Increased volume with progressive overload focus."
+  },
+  advanced: {
+    title: "Advanced 6-Day Elite",
+    description: "High-intensity frequency for maximum muscle growth."
+  }
+};
+
+// Also adding healthData just in case, as it's the next line in your error!
+export const healthData = {
+  tips: ["Stay hydrated", "Focus on mind-muscle connection", "Prioritize sleep"],
+  disclaimer: "Consult a professional before starting a new routine."
+};
