@@ -12,13 +12,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install & Build
+        # This tells GitHub to go into your project folder first
+        working-directory: ./import-workout-components-data
         run: |
           npm install
           npm run build
+
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./dist"
+          # This points to the finished files inside that folder
+          path: "./import-workout-components-data/dist"
+
       - name: Deploy
         uses: actions/deploy-pages@v4
