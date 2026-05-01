@@ -604,3 +604,13 @@ interface ISpeechRecognition extends EventTarget {
   start(): void;
   stop(): void;
 }
+export const copy = {
+  en: {
+    welcome: "Welcome to GluteSync",
+    start: "Start Workout"
+  },
+  es: {
+    welcome: "Bienvenido a GluteSync",
+    start: "Comenzar Entrenamiento"
+  }
+};
