@@ -604,6 +604,143 @@ const App = () => {
                     </div>
                     <div className="rounded-full border border-sky-500/20 bg-black/30 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-400">
                       {program.timeBudget}
+                  // Add this at the end of AriLogic.ts (after line 607)
+
+export const languageNames = {
+  en: "English",
+  es: "Español"
+};
+
+export const clientPrograms = [
+  { 
+    id: "1", 
+    title: "Beginner", 
+    days: 3 as const, 
+    planVariant: "beginner" as const, 
+    timeBudget: "45 min", 
+    goal: "Build foundation with 3 training days", 
+    weeklyLayout: "Mon / Wed / Fri", 
+    bestFor: "Starting out, busy schedules", 
+    outcome: "Strong base for progression" 
+  },
+  { 
+    id: "2", 
+    title: "Intermediate", 
+    days: 5 as const, 
+    planVariant: "intermediate" as const, 
+    timeBudget: "60 min", 
+    goal: "Balanced growth with 5 training days", 
+    weeklyLayout: "Mon / Tue / Wed / Thu / Fri", 
+    bestFor: "Consistent progress seekers", 
+    outcome: "Steady hypertrophy gains" 
+  },
+  { 
+    id: "3", 
+    title: "Advanced", 
+    days: 6 as const, 
+    planVariant: "advanced" as const, 
+    timeBudget: "90 min", 
+    goal: "Maximum hypertrophy with 6 training days", 
+    weeklyLayout: "Mon / Tue / Wed / Thu / Fri / Sat", 
+    bestFor: "Experienced lifters", 
+    outcome: "Elite physique development" 
+  }
+];
+
+export const trainingSchedules = {
+  3: [
+    { day: "Day 1", title: "Lower Power", gluteTag: "GLUTES 3X", focus: "Strength focus", exercises: [], variants: {} },
+    { day: "Day 2", title: "Upper", gluteTag: "", focus: "Back and shoulders", exercises: [], variants: {} },
+    { day: "Day 3", title: "Glutes & Hamstrings", gluteTag: "GLUTES 3X", focus: "Posterior chain", exercises: [], variants: {} }
+  ],
+  5: [
+    { day: "Day 1", title: "Glutes & Lower A", gluteTag: "GLUTES 3X", focus: "Heavy glutes", exercises: [], variants: {} },
+    { day: "Day 2", title: "Upper Push", gluteTag: "", focus: "Chest, shoulders, triceps", exercises: [], variants: {} },
+    { day: "Day 3", title: "Glutes & Hamstrings", gluteTag: "GLUTES 3X", focus: "Posterior chain", exercises: [], variants: {} },
+    { day: "Day 4", title: "Upper Pull", gluteTag: "", focus: "Back and biceps", exercises: [], variants: {} },
+    { day: "Day 5", title: "Glute Finisher", gluteTag: "GLUTES 3X", focus: "High volume", exercises: [], variants: {} }
+  ],
+  6: [
+    { day: "Day 1", title: "Intensive Glutes", gluteTag: "GLUTES 3X", focus: "Maximum glute volume", exercises: [], variants: {} },
+    { day: "Day 2", title: "Upper Push", gluteTag: "", focus: "Pressing movements", exercises: [], variants: {} },
+    { day: "Day 3", title: "Upper Pull", gluteTag: "", focus: "Pulling movements", exercises: [], variants: {} },
+    { day: "Day 4", title: "Glutes & Lower B", gluteTag: "GLUTES 3X", focus: "Secondary glute day", exercises: [], variants: {} },
+    { day: "Day 5", title: "Glute Finisher", gluteTag: "GLUTES 3X", focus: "High rep finisher", exercises: [], variants: {} },
+    { day: "Day 6", title: "Full Body", gluteTag: "", focus: "Integration day", exercises: [], variants: {} }
+  ]
+};
+
+export const workouts = [
+  { day: "Monday", title: "Glutes & Lower", gluteTag: "GLUTES 3X", focus: "Heavy glute strength", exercises: [], variants: {} }
+];
+
+export const healthData = [
+  { day: "Mon", gluteVolume: 100 },
+  { day: "Tue", gluteVolume: 120 },
+  { day: "Wed", gluteVolume: 140 },
+  { day: "Thu", gluteVolume: 130 },
+  { day: "Fri", gluteVolume: 150 },
+  { day: "Sat", gluteVolume: 125 },
+  { day: "Sun", gluteVolume: 110 }
+];
+
+// Types that App.tsx needs
+export type WorkoutDay = {
+  day: string;
+  title: string;
+  gluteTag?: string;
+  focus: string;
+  exercises: Exercise[];
+  variants?: Record<PlanVariant, Exercise[]>;
+};
+
+export type Exercise = {
+  name: string;
+  sets: string;
+  reps: string;
+  note: string;
+  example?: string;
+};
+
+export type SetEntry = {
+  reps: string;
+  weight: string;
+  rpe: string;
+  done: boolean;
+};
+
+export type PlanVariant = "beginner" | "intermediate" | "advanced" | "home";
+
+export type TrainingFrequency = 3 | 5 | 6;
+
+export type GoalProgram = {
+  id: string;
+  title: string;
+  days: TrainingFrequency;
+  planVariant: PlanVariant;
+  timeBudget: string;
+  goal: string;
+  weeklyLayout: string;
+  bestFor: string;
+  outcome: string;
+};
+
+export type Challenge = {
+  id: string;
+  title: string;
+  description: string;
+  hashtag: string;
+  durationDays: number;
+};
+
+export type ForumPost = {
+  id: string;
+  author: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  tags: string[];
+};
                     </div>
                   </div>
 
