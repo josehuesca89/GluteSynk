@@ -609,9 +609,24 @@ const App = () => {
                     </div>
                     <div className="rounded-full border border-sky-500/20 bg-black/30 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-400">
                       {program.timeBudget}
-                  // Add this at the end of AriLogic.ts (after line 607)
-
-); 
-}; 
+                  
+</div>
+                  </div>
+                  <p className="text-sm text-gray-400 line-clamp-2">{program.goal}</p>
+                </motion.button>
+              );
+            })}
+          </div>
+          
+          {/* This is a placeholder for your right column if you have one, or just close the grid */}
+          <div className="bg-white/5 rounded-[2rem] border border-white/10 p-8">
+             <h4 className="text-lg font-black mb-2">Plan Details</h4>
+             <p className="text-sm text-gray-400">{activeProgram.outcome}</p>
+          </div>
+        </div>
+      </section>
+    </div> // Closes the main container
+  );
+};
 
 export default App;
