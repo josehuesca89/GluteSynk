@@ -22,3 +22,7 @@ jobs:
           path: "./dist"
       - name: Deploy
         uses: actions/deploy-pages@v4
+- name: Report Failure
+        if: failure()
+        run: |
+          echo "Deployment failed! Check the logs for errors in App.tsx or package.json."
