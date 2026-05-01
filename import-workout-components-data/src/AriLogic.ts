@@ -605,7 +605,6 @@ interface ISpeechRecognition extends EventTarget {
   stop(): void;
 }
 
-};
 export const languageNames = {
   en: "English",
   es: "Español"
