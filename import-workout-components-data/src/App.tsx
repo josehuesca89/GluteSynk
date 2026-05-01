@@ -39,7 +39,6 @@ type Language = "en" | "es";
 
 const App = () => {
   const [lang, setLang] = useState<Language>("en");
-  const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
   const [isPro, setIsPro] = useState(false);
   const [planVariant, setPlanVariant] = useState<PlanVariant>("intermediate");
