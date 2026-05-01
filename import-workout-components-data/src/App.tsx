@@ -15,18 +15,8 @@ import {
   getAriResponse,
   clientPrograms,
   trainingSchedules,
-  workouts,
   languageNames,
-  sampleVoiceCommands,
-  healthData,
-  type WorkoutDay,
-  type PlanVariant,
-  type TrainingFrequency,
-  type Exercise,
-  type SetEntry,
-  type GoalProgram,
-  type Challenge,
-  type ForumPost
+  healthData
 } from './AriLogic';
 import {
   Zap,
@@ -50,8 +40,8 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { AriVoiceAssistant } from './components/AriVoiceAssistant';
-type Language = "en" | "es";
 
+type Language = "en" | "es";
 const App = () => {
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
