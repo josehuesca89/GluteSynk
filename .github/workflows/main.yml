@@ -19,11 +19,9 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./dist"
-        
-- name: Deploy
+          path: "./GluteSynk/dist"
+      - name: Deploy
         uses: actions/deploy-pages@v4
-        
       - name: Report Failure
         if: failure()
         run: |
