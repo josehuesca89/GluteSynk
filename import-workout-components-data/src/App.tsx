@@ -1,9 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Area
+} from "recharts";
 import {
   copy,
   ariKnowledgeBase,
   getAriResponse,
+  clientPrograms,
+  trainingSchedules,
+  workouts,
+  languageNames,
+  sampleVoiceCommands,
+  healthData,
   type WorkoutDay,
   type PlanVariant,
   type TrainingFrequency,
@@ -14,7 +29,6 @@ import {
   type ForumPost
 } from './AriLogic';
 import {
-  
   Zap,
   Sparkles,
   ChevronRight,
@@ -35,6 +49,7 @@ import {
   Scale,
   ShieldCheck
 } from "lucide-react";
+import { AriVoiceAssistant } from './components/AriVoiceAssistant';
 type Language = "en" | "es";
 
 const App = () => {
