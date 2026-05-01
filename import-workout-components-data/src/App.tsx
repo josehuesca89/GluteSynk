@@ -611,10 +611,6 @@ const App = () => {
                       {program.timeBudget}
                   // Add this at the end of AriLogic.ts (after line 607)
 
-export const languageNames = {
-  en: "English",
-  es: "Español"
-};
 
 export const clientPrograms = [
   { 
