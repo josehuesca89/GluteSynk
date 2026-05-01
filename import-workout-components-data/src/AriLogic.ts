@@ -618,3 +618,38 @@ export const languageNames = {
   en: "English",
   es: "Español"
 };
+export const clientPrograms = [
+  { 
+    id: "1", 
+    title: "Beginner", 
+    days: 3, 
+    planVariant: "beginner", 
+    timeBudget: "45min", 
+    goal: "Build foundation", 
+    weeklyLayout: "Mon / Wed / Fri", 
+    bestFor: "Starting out", 
+    outcome: "Strong base" 
+  },
+  { 
+    id: "2", 
+    title: "Intermediate", 
+    days: 5, 
+    planVariant: "intermediate", 
+    timeBudget: "60min", 
+    goal: "Balanced growth", 
+    weeklyLayout: "Mon-Fri", 
+    bestFor: "Consistent progress", 
+    outcome: "Steady gains" 
+  },
+  { 
+    id: "3", 
+    title: "Advanced", 
+    days: 6, 
+    planVariant: "advanced", 
+    timeBudget: "90min", 
+    goal: "Maximum hypertrophy", 
+    weeklyLayout: "Mon-Sat", 
+    bestFor: "Experienced lifters", 
+    outcome: "Elite physique" 
+  }
+];
