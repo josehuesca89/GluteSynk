@@ -614,3 +614,7 @@ export const copy = {
     start: "Comenzar Entrenamiento"
   }
 };
+export const languageNames = {
+  en: "English",
+  es: "Español"
+};
