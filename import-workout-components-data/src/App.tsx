@@ -1,13 +1,6 @@
-import React, { useState } from 'react';
-import { 
-  getAriResponse, 
-  clientPrograms, 
-  trainingSchedules, 
-  languageNames, 
-  healthData,
-  copy 
-} from "./AriLogic";
-import { motion } from 'framer-motion'; // If you are using animations
+import React, { useState, useEffect, useCallback, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
   ResponsiveContainer,
   AreaChart,
   CartesianGrid,
@@ -16,6 +9,8 @@ import { motion } from 'framer-motion'; // If you are using animations
   Tooltip,
   Area
 } from "recharts";
+
+// This single block handles everything coming from your logic file
 import {
   copy,
   ariKnowledgeBase,
