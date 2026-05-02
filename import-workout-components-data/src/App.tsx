@@ -10,7 +10,7 @@ import {
   Area
 } from "recharts";
 
-// This single block handles everything coming from your logic file
+// Only ONE import block for AriLogic
 import {
   copy,
   ariKnowledgeBase,
