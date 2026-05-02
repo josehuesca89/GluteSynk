@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { clientPrograms, trainingSchedules } from './AriLogic';
+import { 
+  getAriResponse, 
+  clientPrograms, 
+  trainingSchedules, 
+  languageNames, 
+  healthData,
+  copy 
+} from "./AriLogic";
 import { motion } from 'framer-motion'; // If you are using animations
   ResponsiveContainer,
   AreaChart,
