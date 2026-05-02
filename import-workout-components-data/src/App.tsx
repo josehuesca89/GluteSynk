@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
+import React, { useState } from 'react';
+import { clientPrograms, trainingSchedules } from './AriLogic';
+import { motion } from 'framer-motion'; // If you are using animations
   ResponsiveContainer,
   AreaChart,
   CartesianGrid,
@@ -43,6 +43,15 @@ import { AriVoiceAssistant } from './components/AriVoiceAssistant';
 
 type Language = "en" | "es";
 const App = () => {
+  // This tells the app which program to show first (the Beginner one)
+  const [activeProgramId, setActiveProgramId] = useState("1");
+  
+  // This finds the full data for the selected program
+  const activeProgram = clientPrograms.find(p => p.id === activeProgramId) || clientPrograms[0];
+
+  // These keep track of the user's settings
+  const [trainingFrequency, setTrainingFrequency] = useState(activeProgram?.days || 3);
+  const [planVariant, setPlanVariant] = useState(activeProgram?.planVariant || 'beginner');
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
   const [isPro, setIsPro] = useState(false);
