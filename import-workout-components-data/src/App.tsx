@@ -43,16 +43,7 @@ import {
 } from './AriLogic';
 import { AriVoiceAssistant } from './components/AriVoiceAssistant';
 
-export default function App() {
-  // --- YOUR APP LOGIC STARTS HERE ---
-  const [activeProgramId, setActiveProgramId] = useState("1");
-  // ... rest of your code
-const App = () => {
-  // This tells the app which program to show first (the Beginner one)
-  const [activeProgramId, setActiveProgramId] = useState("1");
-  
-  // This finds the full data for the selected program
-  const activeProgram = clientPrograms.find(p => p.id === activeProgramId) || clientPrograms[0];
+
 
   // These keep track of the user's settings
   const [trainingFrequency, setTrainingFrequency] = useState(activeProgram?.days || 3);
@@ -643,4 +634,4 @@ const App = () => {
   );
 };
 
-export default App;
+
