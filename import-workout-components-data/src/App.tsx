@@ -9,19 +9,6 @@ import {
   Tooltip,
   Area
 } from "recharts";
-
-import {
-  copy,
-  ariKnowledgeBase,
-  getAriResponse,
-  clientPrograms,
-  trainingSchedules,
-  languageNames,
-  healthData
-} from './AriLogic';
-
-export default function App() {
-  // Your code starts here...
 import {
   Zap,
   Sparkles,
@@ -43,9 +30,23 @@ import {
   Scale,
   ShieldCheck
 } from "lucide-react";
+
+// The Local Files
+import {
+  copy,
+  ariKnowledgeBase,
+  getAriResponse,
+  clientPrograms,
+  trainingSchedules,
+  languageNames,
+  healthData
+} from './AriLogic';
 import { AriVoiceAssistant } from './components/AriVoiceAssistant';
 
-type Language = "en" | "es";
+export default function App() {
+  // --- YOUR APP LOGIC STARTS HERE ---
+  const [activeProgramId, setActiveProgramId] = useState("1");
+  // ... rest of your code
 const App = () => {
   // This tells the app which program to show first (the Beginner one)
   const [activeProgramId, setActiveProgramId] = useState("1");
