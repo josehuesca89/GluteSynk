@@ -17,15 +17,16 @@ jobs:
         run: |
           npm install
           npm run build
-        
-          npm install
-          npm run build
+
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./import-workout-components-data/dist"
+          # Change this from "./import-workout-components-data/dist" to just "./dist"
+          path: "./dist"
+
       - name: Deploy
         uses: actions/deploy-pages@v4
+
       - name: Report Failure
         if: failure()
         run: |
