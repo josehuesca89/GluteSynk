@@ -628,7 +628,7 @@ import { AriVoiceAssistant } from './components/AriVoiceAssistant';
           </div>
         </div>
       </section>
-  </div> // Closes the main container
+  </div>
   );
 };
 
