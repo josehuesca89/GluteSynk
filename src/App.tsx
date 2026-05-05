@@ -45,9 +45,7 @@ import { AriVoiceAssistant } from './components/AriVoiceAssistant';
 
 
 
-  // These keep track of the user's settings
-  const [trainingFrequency, setTrainingFrequency] = useState(activeProgram?.days || 3);
-  const [planVariant, setPlanVariant] = useState(activeProgram?.planVariant || 'beginner');
+ // These keep track of the user's settings
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
   const [isPro, setIsPro] = useState(false);
@@ -55,7 +53,7 @@ import { AriVoiceAssistant } from './components/AriVoiceAssistant';
   const [trainingFrequency, setTrainingFrequency] = useState<TrainingFrequency>(5);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
-  const [activeProgramId, setActiveProgramId] = useState(clientPrograms[1].id);
+  const [activeProgramId, setActiveProgramId] = useState(clientPrograms[1].id); 
   
   // Reference knowledge base for Ari's responses (used in getAriResponse)
   const _knowledge = ariKnowledgeBase;
@@ -630,8 +628,10 @@ import { AriVoiceAssistant } from './components/AriVoiceAssistant';
           </div>
         </div>
       </section>
-    </div> // Closes the main container
+  </div> // Closes the main container
   );
 };
+
+export default App;
 
 
