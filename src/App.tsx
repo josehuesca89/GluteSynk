@@ -43,7 +43,7 @@ import {
 } from './AriLogic';
 import { AriVoiceAssistant } from './components/AriVoiceAssistant';
 
-
+const App = () => {
 
  // These keep track of the user's settings
   const [lang, setLang] = useState<Language>("en");
