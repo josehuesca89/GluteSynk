@@ -1,7 +1,7 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import React, { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
-import './index.css' // <--- Make sure this line exists!
+import './index.css'
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
