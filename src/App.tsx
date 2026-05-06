@@ -6,56 +6,36 @@ import { Zap, ChevronRight } from "lucide-react";
 import { copy, clientPrograms, languageNames } from './AriLogic';
 
 const App = () => {
-  // 1. Initial State with safety fallbacks
+  // 1. Initial State
   const [lang, setLang] = useState<"en" | "es">("en");
   const [activeId, setActiveId] = useState(clientPrograms?.[0]?.id || 1);
 
-  // 2. Safety check: If AriLogic failed to load, don't crash the app
+  // 2. Data Preparation (Logic stays ABOVE the return)
   const t = copy?.[lang] || { heroText: "GluteSync", cta1: "Get Started" };
   const programs = clientPrograms || [];
+  const activeProgram = programs.find(p => p.id === activeId) || programs[0];
 
   const handleButtonClick = (id: number) => {
     console.log("Button Clicked! ID:", id);
     setActiveId(id);
+    // Optional: Scroll back to top to see the change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-x-hidden">
       
-{/* 1. BACKGROUND LAYER - Added pointer-events-none to stop it from blocking clicks */}
-<div className="fixed inset-0 z-0 overflow-hidden bg-black pointer-events-none">
-  <video
-    className="absolute inset-0 h-full w-full object-cover opacity-40"
-    autoPlay loop muted playsInline
-    src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4"
-  />
-  <div className="absolute inset-0 bg-black/40" />
-</div>
+      {/* 1. BACKGROUND LAYER */}
+      <div className="fixed inset-0 z-0 overflow-hidden bg-black pointer-events-none">
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-40"
+          autoPlay loop muted playsInline
+          src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
 
-{/* 2. CONTENT LAYER - Using your branding */}
-<section className="relative z-50 flex-grow flex flex-col items-center justify-center text-center px-4">
-  <motion.h1 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="text-7xl md:text-9xl font-black italic uppercase leading-none"
-  >
-    GLUTE<span className="text-sky-300">SYNC</span>
-  </motion.h1>
-  <p className="text-xl mt-4 max-w-xl font-bold text-gray-300">{t.heroText}</p>
-  
-  {/* Added a console log here to test responsiveness */}
-  <button 
-    onClick={() => {
-      console.log("Button is working!");
-      document.getElementById('programs')?.scrollIntoView({behavior: 'smooth'});
-    }}
-    className="relative z-[60] mt-8 px-10 py-5 bg-sky-300 text-black font-black rounded-full uppercase tracking-widest hover:bg-white transition-all active:scale-95"
-  >
-    {t.cta1}
-  </button>
-</section>
-
-      {/* INTERACTIVE UI LAYER (z-50) */}
+      {/* 2. INTERACTIVE UI LAYER */}
       <main className="relative z-50 min-h-screen flex flex-col">
         
         {/* Navigation */}
@@ -68,7 +48,7 @@ const App = () => {
           </div>
           
           <select 
-            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
+            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white"
             value={lang}
             onChange={(e) => setLang(e.target.value as "en" | "es")}
           >
@@ -77,29 +57,37 @@ const App = () => {
           </select>
         </nav>
 
-        {/* Hero Section */}
-        <section className="flex-grow flex flex-col items-center justify-center px-6 text-center">
+        {/* HERO SECTION - Now updates based on activeProgram */}
+        <section className="flex-grow flex flex-col items-center justify-center text-center px-4 min-h-[70vh]">
           <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-9xl font-black italic uppercase leading-[0.8]"
+            key={activeId} // Key forces animation to reset on change
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-6xl md:text-9xl font-black italic uppercase leading-none"
           >
-            THE <span className="text-sky-400">METHOD</span>
+            {/* If a program is selected, show its title; otherwise show the brand */}
+            {activeId ? activeProgram.title : "GLUTESYNC"}
           </motion.h1>
-          <p className="mt-6 text-lg md:text-xl font-medium text-gray-300 max-w-2xl">
-            {t.heroText}
+          
+          <p className="text-xl mt-4 max-w-xl font-bold text-gray-300">
+            {activeId ? activeProgram.goal : t.heroText}
           </p>
+          
           <button 
             onClick={() => document.getElementById('programs')?.scrollIntoView({behavior: 'smooth'})}
-            className="mt-10 px-10 py-5 bg-sky-400 text-black font-black rounded-full uppercase tracking-widest hover:bg-white transition-colors"
+            className="mt-8 px-10 py-5 bg-sky-300 text-black font-black rounded-full uppercase tracking-widest hover:bg-white transition-all active:scale-95"
           >
             {t.cta1}
           </button>
         </section>
 
-        {/* Program Selector */}
-        <section id="programs" className="p-6 md:p-12 max-w-6xl mx-auto w-full pb-24">
-          <div className="grid md:grid-cols-2 gap-4">
+        {/* PROGRAM SELECTOR SECTION */}
+        <section id="programs" className="p-6 md:p-12 max-w-6xl mx-auto w-full pb-24 bg-black/20">
+          <h2 className="text-3xl font-black uppercase italic mb-8 border-l-4 border-sky-400 pl-4">
+            Select Your Plan
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {programs.map((p) => (
               <button
                 key={p.id}
