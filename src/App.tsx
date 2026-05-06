@@ -1,111 +1,100 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Zap, ChevronRight } from "lucide-react";
-
-// CRITICAL: Ensure these paths are exactly correct for your new /src structure
-import { copy, clientPrograms, languageNames } from './AriLogic';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Zap, ChevronRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { copy, clientPrograms, trainingSchedules } from './AriLogic';
 
 const App = () => {
-  // 1. Initial State
   const [lang, setLang] = useState<"en" | "es">("en");
-  const [activeId, setActiveId] = useState(clientPrograms?.[0]?.id || 1);
+  const [activeId, setActiveId] = useState(clientPrograms[0].id);
+  const [showWorkouts, setShowWorkouts] = useState(false); // NEW: Controls the "Advance"
 
-  // 2. Data Preparation (Logic stays ABOVE the return)
-  const t = copy?.[lang] || { heroText: "GluteSync", cta1: "Get Started" };
-  const programs = clientPrograms || [];
-  const activeProgram = programs.find(p => p.id === activeId) || programs[0];
-
-  const handleButtonClick = (id: number) => {
-    console.log("Button Clicked! ID:", id);
-    setActiveId(id);
-    // Optional: Scroll back to top to see the change
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const t = copy[lang] || copy.en;
+  const activeProgram = clientPrograms.find(p => p.id === activeId) || clientPrograms[0];
+  
+  // Get the actual exercises based on the selected program's day count
+  const workoutData = trainingSchedules[activeProgram.days] || [];
 
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-x-hidden">
-      
-      {/* 1. BACKGROUND LAYER */}
-      <div className="fixed inset-0 z-0 overflow-hidden bg-black pointer-events-none">
-        <video
-          className="absolute inset-0 h-full w-full object-cover opacity-40"
-          autoPlay loop muted playsInline
-          src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4"
-        />
-        <div className="absolute inset-0 bg-black/40" />
+    <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden">
+      {/* Background stays the same */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <video className="w-full h-full object-cover opacity-30" autoPlay loop muted playsInline src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4" />
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* 2. INTERACTIVE UI LAYER */}
       <main className="relative z-50 min-h-screen flex flex-col">
-        
-        {/* Navigation */}
-        <nav className="p-6 flex justify-between items-center backdrop-blur-md bg-black/30">
+        <nav className="p-6 flex justify-between items-center backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <Zap className="text-sky-400 w-8 h-8" />
-            <span className="text-2xl font-black italic tracking-tighter uppercase">
-              GLUTE<span className="text-sky-400">SYNC</span>
-            </span>
+            <Zap className="text-sky-400" />
+            <span className="text-2xl font-black italic uppercase">GLUTE<span className="text-sky-400">SYNC</span></span>
           </div>
-          
-          <select 
-            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white"
-            value={lang}
-            onChange={(e) => setLang(e.target.value as "en" | "es")}
-          >
-            <option value="en" className="bg-black">English</option>
-            <option value="es" className="bg-black">Español</option>
-          </select>
+          {showWorkouts && (
+            <button onClick={() => setShowWorkouts(false)} className="flex items-center gap-2 text-sm font-bold uppercase text-sky-400">
+              <ArrowLeft size={16} /> Back
+            </button>
+          )}
         </nav>
 
-        {/* HERO SECTION - Now updates based on activeProgram */}
-        <section className="flex-grow flex flex-col items-center justify-center text-center px-4 min-h-[70vh]">
-          <motion.h1 
-            key={activeId} // Key forces animation to reset on change
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-6xl md:text-9xl font-black italic uppercase leading-none"
-          >
-            {/* If a program is selected, show its title; otherwise show the brand */}
-            {activeId ? activeProgram.title : "GLUTESYNC"}
-          </motion.h1>
-          
-          <p className="text-xl mt-4 max-w-xl font-bold text-gray-300">
-            {activeId ? activeProgram.goal : t.heroText}
-          </p>
-          
-          <button 
-            onClick={() => document.getElementById('programs')?.scrollIntoView({behavior: 'smooth'})}
-            className="mt-8 px-10 py-5 bg-sky-300 text-black font-black rounded-full uppercase tracking-widest hover:bg-white transition-all active:scale-95"
-          >
-            {t.cta1}
-          </button>
-        </section>
-
-        {/* PROGRAM SELECTOR SECTION */}
-        <section id="programs" className="p-6 md:p-12 max-w-6xl mx-auto w-full pb-24 bg-black/20">
-          <h2 className="text-3xl font-black uppercase italic mb-8 border-l-4 border-sky-400 pl-4">
-            Select Your Plan
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {programs.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => handleButtonClick(p.id)}
-                className={`p-8 rounded-3xl border-2 text-left transition-all duration-300 ${
-                  activeId === p.id 
-                    ? "bg-sky-500/20 border-sky-400 ring-4 ring-sky-400/20" 
-                    : "bg-white/5 border-white/10 hover:border-white/30"
-                }`}
+        <AnimatePresence mode="wait">
+          {!showWorkouts ? (
+            /* HOME VIEW */
+            <motion.section 
+              key="home"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="flex-grow flex flex-col items-center justify-center text-center px-6"
+            >
+              <motion.h1 key={activeId} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-7xl md:text-9xl font-black italic uppercase">
+                {activeProgram.title}
+              </motion.h1>
+              <p className="text-xl text-gray-400 font-bold mt-4">{activeProgram.goal}</p>
+              
+              <button 
+                onClick={() => setShowWorkouts(true)} // THIS ADVANCES THE PAGE
+                className="mt-10 px-10 py-5 bg-sky-400 text-black font-black rounded-full uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
               >
-                <div className="text-sky-400 font-bold text-xs uppercase mb-2">{p.days} Day Split</div>
-                <h3 className="text-2xl font-black uppercase italic">{p.title}</h3>
-                <p className="text-gray-400 mt-2 text-sm leading-relaxed">{p.goal}</p>
+                {t.cta1} <ChevronRight />
               </button>
-            ))}
-          </div>
-        </section>
 
+              <div className="grid md:grid-cols-3 gap-4 mt-20 max-w-4xl w-full">
+                {clientPrograms.map((p) => (
+                  <button key={p.id} onClick={() => setActiveId(p.id)} className={`p-6 rounded-2xl border-2 transition-all ${activeId === p.id ? "bg-sky-500/20 border-sky-400" : "bg-white/5 border-white/10"}`}>
+                    <div className="text-xs font-bold uppercase text-sky-400">{p.days} Days</div>
+                    <div className="font-black uppercase italic">{p.title}</div>
+                  </button>
+                ))}
+              </div>
+            </motion.section>
+          ) : (
+            /* WORKOUT LIST VIEW (The "Advancement") */
+            <motion.section 
+              key="workouts"
+              initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+              className="p-6 md:p-12 max-w-4xl mx-auto w-full"
+            >
+              <h2 className="text-4xl font-black uppercase italic mb-8">Your {activeProgram.days}-Day Routine</h2>
+              <div className="space-y-6">
+                {workoutData.map((day, idx) => (
+                  <div key={idx} className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:border-sky-400/50 transition-colors">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-2xl font-black text-sky-300 uppercase italic">{day.title || `Day ${idx + 1}`}</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {day.exercises?.map((ex, exIdx) => (
+                        <div key={exIdx} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                          <div>
+                            <div className="font-bold text-lg">{ex.name}</div>
+                            <div className="text-sm text-gray-400">{ex.sets} Sets</div>
+                          </div>
+                          <CheckCircle2 className="text-white/20 hover:text-sky-400 cursor-pointer" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
