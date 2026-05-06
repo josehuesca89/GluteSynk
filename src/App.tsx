@@ -22,15 +22,38 @@ const App = () => {
   return (
     <div className="relative min-h-screen bg-black text-white overflow-x-hidden">
       
-      {/* BACKGROUND LAYER (z-0) */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <video
-          className="w-full h-full object-cover opacity-50"
-          autoPlay loop muted playsInline
-          src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black" />
-      </div>
+{/* 1. BACKGROUND LAYER - Added pointer-events-none to stop it from blocking clicks */}
+<div className="fixed inset-0 z-0 overflow-hidden bg-black pointer-events-none">
+  <video
+    className="absolute inset-0 h-full w-full object-cover opacity-40"
+    autoPlay loop muted playsInline
+    src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4"
+  />
+  <div className="absolute inset-0 bg-black/40" />
+</div>
+
+{/* 2. CONTENT LAYER - Using your branding */}
+<section className="relative z-50 flex-grow flex flex-col items-center justify-center text-center px-4">
+  <motion.h1 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="text-7xl md:text-9xl font-black italic uppercase leading-none"
+  >
+    GLUTE<span className="text-sky-300">SYNC</span>
+  </motion.h1>
+  <p className="text-xl mt-4 max-w-xl font-bold text-gray-300">{t.heroText}</p>
+  
+  {/* Added a console log here to test responsiveness */}
+  <button 
+    onClick={() => {
+      console.log("Button is working!");
+      document.getElementById('programs')?.scrollIntoView({behavior: 'smooth'});
+    }}
+    className="relative z-[60] mt-8 px-10 py-5 bg-sky-300 text-black font-black rounded-full uppercase tracking-widest hover:bg-white transition-all active:scale-95"
+  >
+    {t.cta1}
+  </button>
+</section>
 
       {/* INTERACTIVE UI LAYER (z-50) */}
       <main className="relative z-50 min-h-screen flex flex-col">
