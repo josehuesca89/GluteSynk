@@ -1,41 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-  ResponsiveContainer,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Area
-} from "recharts";
-import {
   Zap,
-  Sparkles,
   ChevronRight,
-  Coffee,
-  Flame,
-  CheckCircle2,
-  Moon,
-  Brain,
-  Clock,
-  Sun,
-  Apple,
-  Smartphone,
-  Activity,
-  Dumbbell,
-  Heart,
-  Share2
 } from "lucide-react";
 
-// The Local Files
+// The Local Files - Ensure these match your actual AriLogic.ts exports exactly
 import {
   copy,
   ariKnowledgeBase,
   clientPrograms,
   trainingSchedules,
   languageNames,
-  healthData
 } from './AriLogic';
 
 // Types for your state
@@ -55,34 +31,21 @@ interface Exercise {
 }
 
 const App = () => {
-  // These keep track of the user's settings
+  // 1. State Management
   const [lang, setLang] = useState<Language>("en");
   const t = copy[lang as keyof typeof copy] || copy.en;
-  const [activeProgramId, setActiveProgramId] = useState(clientPrograms[1].id); 
+  
+  // Defaulting to the first available program
+  const [activeProgramId, setActiveProgramId] = useState(clientPrograms[0]?.id || 1); 
   const [trainingFrequency, setTrainingFrequency] = useState<TrainingFrequency>(5);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
-  // Reference knowledge base
-  const _knowledge = ariKnowledgeBase;
-  void _knowledge;
-  
-  const displayedWorkouts = trainingSchedules[trainingFrequency as keyof typeof trainingSchedules] || [];
-  const activeProgram = clientPrograms.find((program) => program.id === activeProgramId) ?? clientPrograms[1];
-
-  useEffect(() => {
-    setSelectedDayIndex((current) => Math.min(current, Math.max(0, displayedWorkouts.length - 1)));
-  }, [displayedWorkouts.length]);
-
+  // Constants
   const workoutsKey = "glutesync.workouts.v1";
+  const displayedWorkouts = trainingSchedules[trainingFrequency as keyof typeof trainingSchedules] || [];
+  const activeProgram = clientPrograms.find((p) => p.id === activeProgramId) ?? clientPrograms[0];
 
-  const parseSets = (sets: string): number => {
-    const n = parseInt(sets, 10);
-    return isFinite(n) ? n : 3;
-  };
-
-  const makeDefaultSetEntries = (sets: string): SetEntry[] =>
-    Array.from({ length: parseSets(sets) }).map(() => ({ reps: "", weight: "", rpe: "", done: false }));
-
+  // 2. Logic & Storage
   const [tracking, setTracking] = useState<Record<string, SetEntry[]>>(() => {
     try {
       const raw = localStorage.getItem(workoutsKey);
@@ -93,49 +56,50 @@ const App = () => {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(workoutsKey, JSON.stringify(tracking));
-    } catch {
-      // ignore
+    localStorage.setItem(workoutsKey, JSON.stringify(tracking));
+  }, [tracking]);
+
+  const parseSets = (sets: string): number => {
+    const n = parseInt(sets, 10);
+    return isFinite(n) ? n : 3;
+  };
+
+  const makeDefaultSetEntries = (sets: string): SetEntry[] =>
+    Array.from({ length: parseSets(sets) }).map(() => ({ reps: "", weight: "", rpe: "", done: false }));
+
+  const ensureTracking = useCallback((dayIndex: number, ex: Exercise) => {
+    const key = `${dayIndex}::${ex.name}`;
+    if (!tracking[key]) {
+      setTracking((prev) => ({ ...prev, [key]: makeDefaultSetEntries(ex.sets) }));
     }
   }, [tracking]);
 
-  const exerciseKey = (dayIndex: number, exerciseName: string) => `${dayIndex}::${exerciseName}`;
-
-  const ensureTracking = useCallback(
-    (dayIndex: number, ex: Exercise) => {
-      const key = exerciseKey(dayIndex, ex.name);
-      if (tracking[key]) return;
-      setTracking((prev) => ({ ...prev, [key]: makeDefaultSetEntries(ex.sets) }));
-    },
-    [tracking]
-  );
-
   useEffect(() => {
     const day = displayedWorkouts[selectedDayIndex];
-    if (!day || !day.exercises) return;
-    day.exercises.forEach((ex: Exercise) => ensureTracking(selectedDayIndex, ex));
+    if (day?.exercises) {
+      day.exercises.forEach((ex: Exercise) => ensureTracking(selectedDayIndex, ex));
+    }
   }, [selectedDayIndex, displayedWorkouts, ensureTracking]);
 
   return (
     <div className="min-h-screen bg-[#050a08] text-gray-100 font-sans selection:bg-sky-500/30">
       <div className="relative min-h-screen flex flex-col">
-        {/* Background Video Layer */}
+        
+        {/* BACKGROUND LAYER (z-0) */}
         <div className="absolute inset-0 z-0 overflow-hidden bg-black">
           <video
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="absolute inset-0 h-full w-full object-cover"
             autoPlay loop muted playsInline preload="metadata"
-            poster="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=90&w=2400"
+            poster="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=2400"
           >
             <source src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4" type="video/mp4" />
           </video>
+          {/* Overlay to ensure text readability */}
+          <div className="absolute inset-0 bg-black/60 z-10" />
         </div>
-        
-        {/* Gradient Overlay Layer */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/80 via-black/50 to-black/10" />
-        
-        {/* Interactive Nav Layer */}
-        <nav className="relative z-50 w-full bg-black/80 backdrop-blur-xl border-b border-white/10">
+
+        {/* INTERACTIVE UI LAYER (z-20+) */}
+        <nav className="relative z-30 w-full bg-black/80 backdrop-blur-xl border-b border-white/10">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
@@ -145,13 +109,14 @@ const App = () => {
                 GLUTE<span className="text-sky-300">SYNC</span>
               </span>
             </div>
+            
             <select 
-              className="bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-300"
+              className="bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white cursor-pointer"
               value={lang}
               onChange={(e) => setLang(e.target.value as Language)}
             >
               {Object.entries(languageNames).map(([code, name]) => (
-                <option key={code} value={code} className="bg-black text-white">
+                <option key={code} value={code} className="bg-black">
                   {name as string}
                 </option>
               ))}
@@ -159,7 +124,6 @@ const App = () => {
           </div>
         </nav>
 
-        {/* Hero Section Layer */}
         <section className="relative z-20 flex-grow flex items-center justify-center px-6">
           <div className="max-w-5xl mx-auto text-center">
             <motion.h1 
@@ -173,8 +137,11 @@ const App = () => {
             <p className="text-xl md:text-2xl text-gray-300 mt-6 max-w-2xl mx-auto font-bold">
               {t.heroText}
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mt-12">
-              <button className="px-10 py-5 bg-sky-300 text-black font-black rounded-full text-xl uppercase tracking-widest flex items-center gap-2 justify-center hover:bg-white transition-colors">
+            <div className="mt-12">
+              <button 
+                onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}
+                className="px-10 py-5 bg-sky-300 text-black font-black rounded-full text-xl uppercase tracking-widest flex items-center gap-2 justify-center hover:bg-white transition-all transform active:scale-95"
+              >
                 {t.cta1} <ChevronRight />
               </button>
             </div>
@@ -182,9 +149,9 @@ const App = () => {
         </section>
       </div>
 
-      {/* Content Section */}
+      {/* DASHBOARD SECTION */}
       <section className="relative z-30 py-24 px-6 max-w-7xl mx-auto">
-        <h2 className="text-4xl font-black mb-12">Program Dashboard</h2>
+        <h2 className="text-4xl font-black mb-12 uppercase italic">Program Dashboard</h2>
         <div className="grid lg:grid-cols-[1.5fr_1fr] gap-8">
           <div className="grid md:grid-cols-2 gap-4">
             {clientPrograms.map((program) => (
@@ -194,8 +161,10 @@ const App = () => {
                   setActiveProgramId(program.id);
                   setTrainingFrequency(program.days as TrainingFrequency);
                 }}
-                className={`p-6 rounded-3xl border text-left transition-all hover:scale-[1.02] active:scale-95 ${
-                  activeProgramId === program.id ? "bg-sky-500/20 border-sky-400 shadow-[0_0_20px_rgba(125,211,252,0.1)]" : "bg-white/5 border-white/10"
+                className={`p-6 rounded-3xl border text-left transition-all ${
+                  activeProgramId === program.id 
+                    ? "bg-sky-500/20 border-sky-400 ring-2 ring-sky-400" 
+                    : "bg-white/5 border-white/10 hover:border-white/30"
                 }`}
               >
                 <div className="text-sky-400 text-xs font-black uppercase mb-1">{program.days} Days</div>
@@ -204,9 +173,12 @@ const App = () => {
               </button>
             ))}
           </div>
-          <div className="bg-white/5 p-8 rounded-3xl border border-white/10 h-fit sticky top-24">
-            <h3 className="text-xl font-black mb-4">Plan Outcome</h3>
-            <p className="text-gray-400 leading-relaxed">{activeProgram.outcome}</p>
+          
+          <div className="bg-white/5 p-8 rounded-3xl border border-white/10 h-fit">
+            <h3 className="text-xl font-black mb-4 uppercase text-sky-300">Plan Outcome</h3>
+            <p className="text-gray-300 leading-relaxed">
+              {activeProgram?.outcome || "Select a program to see details."}
+            </p>
           </div>
         </div>
       </section>
