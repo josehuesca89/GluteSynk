@@ -13,6 +13,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # This solves the Node.js 20 deprecation warning
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
       - name: Install & Build
         run: |
           npm install --legacy-peer-deps
@@ -29,4 +36,4 @@ jobs:
       - name: Report Failure
         if: failure()
         run: |
-          echo "Deployment failed! Check the logs for errors in App.tsx or package.json."
+          echo "Deployment failed! Check the logs above for specific TypeScript or Linting errors."
