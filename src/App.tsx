@@ -11,8 +11,9 @@ const App = () => {
   const [completed, setCompleted] = useLocalStorage<string[]>("glutesync_completed", []);
   const [expandedEx, setExpandedEx] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // 1. Define Voice function FIRST so other functions can use it
+  // 1. Define Voice function
   const speakCoaching = (text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -34,25 +35,44 @@ const App = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft]);
+  }, [timeLeft, lang]);
 
-  // 3. Single Toggle function with Timer logic
+  const activeProgram = clientPrograms.find(p => p.id === activeId) || clientPrograms[0];
+  const currentSchedule = (trainingSchedules as any)[activeProgram.planVariant];
+  const workoutList = currentSchedule?.workouts || [];
+
+  // 3. Updated Toggle function with Success Detection
   const toggleExercise = (exerciseKey: string, name: string) => {
     const isNowCompleted = !completed.includes(exerciseKey);
-    setCompleted(prev => isNowCompleted ? [...prev, exerciseKey] : prev.filter(id => id !== exerciseKey));
+    
+    // Calculate the updated completed list to check for workout finish
+    const newCompleted = isNowCompleted 
+      ? [...completed, exerciseKey] 
+      : completed.filter(id => id !== exerciseKey);
+    
+    setCompleted(newCompleted);
     
     if (isNowCompleted) {
-      speakCoaching(lang === "en" ? `Great job on the ${name}!` : `¡Buen trabajo con ${name}!`);
-      setTimeLeft(60); // Starts the 60s rest
+      // Check if all exercises in the current list are finished
+      const allExerciseKeys = workoutList.map((ex: any) => `${activeId}-${ex.name}`);
+      const isWorkoutFinished = allExerciseKeys.every(key => newCompleted.includes(key));
+
+      if (isWorkoutFinished) {
+        setTimeLeft(null); // Stop any active timer
+        setShowSuccess(true);
+        speakCoaching(lang === "en" 
+          ? "Workout complete! Amazing job today. You are getting stronger every single day!" 
+          : "¡Entrenamiento completado! Increíble trabajo hoy. ¡Te estás volviendo más fuerte cada día!");
+      } else {
+        speakCoaching(lang === "en" ? `Great job on the ${name}!` : `¡Buen trabajo con ${name}!`);
+        setTimeLeft(60); 
+      }
     } else {
-      setTimeLeft(null); // Cancels rest if you uncheck
+      setTimeLeft(null);
     }
   };
 
   const t = copy[lang] || copy.en;
-  const activeProgram = clientPrograms.find(p => p.id === activeId) || clientPrograms[0];
-  const currentSchedule = (trainingSchedules as any)[activeProgram.planVariant];
-  const workoutList = currentSchedule?.workouts || [];
 
   return (
     <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden">
@@ -77,7 +97,6 @@ const App = () => {
 
         <AnimatePresence mode="wait">
           {!showWorkouts ? (
-            /* HOME SCREEN */
             <motion.section key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-grow flex flex-col items-center justify-center text-center px-6 py-12">
               <h1 className="text-7xl md:text-9xl font-black italic uppercase tracking-tighter leading-none mb-4">{activeProgram.title}</h1>
               <p className="text-xl text-sky-400/80 font-bold uppercase tracking-widest mb-10">{activeProgram.goal}</p>
@@ -96,70 +115,64 @@ const App = () => {
               </div>
             </motion.section>
           ) : (
-            /* WORKOUT SCREEN */
             <motion.section key="workouts" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="p-6 md:p-12 max-w-4xl mx-auto w-full pb-32">
               <h2 className="text-5xl font-black uppercase italic mb-2 tracking-tighter">{activeProgram.title}</h2>
               <p className="text-sky-400 font-bold uppercase tracking-widest text-xs mb-10">{currentSchedule?.title}</p>
               
               <div className="space-y-4">
-                {workoutList.length > 0 ? (
-                  workoutList.map((ex: any, i: number) => {
-                    const exerciseKey = `${activeId}-${ex.name}`;
-                    const isDone = completed.includes(exerciseKey);
-                    const isExpanded = expandedEx === exerciseKey;
-                    const details = (ariKnowledgeBase.exercises as any)[ex.name];
+                {workoutList.map((ex: any, i: number) => {
+                  const exerciseKey = `${activeId}-${ex.name}`;
+                  const isDone = completed.includes(exerciseKey);
+                  const isExpanded = expandedEx === exerciseKey;
+                  const details = (ariKnowledgeBase.exercises as any)[ex.name];
 
-                    return (
-                      <div key={i} className={`group rounded-3xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'bg-sky-950/20 border-sky-400/50' : 'bg-white/5 border-white/10'}`}>
-                        <div className="flex items-center justify-between p-6 cursor-pointer" onClick={() => setExpandedEx(isExpanded ? null : exerciseKey)}>
-                          <div className="flex-grow">
-                            <div className={`font-black text-2xl uppercase italic tracking-tighter transition-all ${isDone ? 'text-gray-600 line-through' : 'text-white'}`}>
-                              {ex.name}
-                            </div>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-sky-400 text-xs font-black uppercase tracking-widest">{ex.sets} Sets</span>
-                              {!isDone && <Info size={14} className="text-white/20 group-hover:text-sky-400 transition-colors" />}
-                            </div>
+                  return (
+                    <div key={i} className={`group rounded-3xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'bg-sky-950/20 border-sky-400/50' : 'bg-white/5 border-white/10'}`}>
+                      <div className="flex items-center justify-between p-6 cursor-pointer" onClick={() => setExpandedEx(isExpanded ? null : exerciseKey)}>
+                        <div className="flex-grow">
+                          <div className={`font-black text-2xl uppercase italic tracking-tighter transition-all ${isDone ? 'text-gray-600 line-through' : 'text-white'}`}>
+                            {ex.name}
                           </div>
-                          
-                          <CheckCircle2 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExercise(exerciseKey, ex.name);
-                            }}
-                            className={`transition-all duration-500 ${isDone ? "text-sky-400 scale-125 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" : "text-white/10 hover:text-white/30"}`} 
-                            size={32}
-                          />
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-sky-400 text-xs font-black uppercase tracking-widest">{ex.sets} Sets</span>
+                            {!isDone && <Info size={14} className="text-white/20 group-hover:text-sky-400 transition-colors" />}
+                          </div>
                         </div>
-
-                        <AnimatePresence>
-                          {isExpanded && details && (
-                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-white/5">
-                              <div className="p-6 bg-black/40 space-y-4">
-                                <div>
-                                  <div className="text-[10px] font-black uppercase tracking-widest text-sky-400 mb-2">Ari's Form Cue</div>
-                                  <p className="text-sm text-gray-300 leading-relaxed font-medium">{details.form}</p>
-                                </div>
-                                {details.commonMistakes && (
-                                  <div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Watch Out For</div>
-                                    <ul className="text-sm text-gray-400 space-y-1 italic">
-                                      {details.commonMistakes.map((m: string, idx: number) => (
-                                        <li key={idx}>• {m}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        <CheckCircle2 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExercise(exerciseKey, ex.name);
+                          }}
+                          className={`transition-all duration-500 ${isDone ? "text-sky-400 scale-125 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" : "text-white/10 hover:text-white/30"}`} 
+                          size={32}
+                        />
                       </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-center text-gray-500 font-black uppercase tracking-widest py-20">No routine found.</p>
-                )}
+
+                      <AnimatePresence>
+                        {isExpanded && details && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-white/5">
+                            <div className="p-6 bg-black/40 space-y-4">
+                              <div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-sky-400 mb-2">Ari's Form Cue</div>
+                                <p className="text-sm text-gray-300 leading-relaxed font-medium">{details.form}</p>
+                              </div>
+                              {details.commonMistakes && (
+                                <div>
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Watch Out For</div>
+                                  <ul className="text-sm text-gray-400 space-y-1 italic">
+                                    {details.commonMistakes.map((m: string, idx: number) => (
+                                      <li key={idx}>• {m}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
               </div>
             </motion.section>
           )}
@@ -185,6 +198,52 @@ const App = () => {
                   Skip
                 </button>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* SUCCESS MODAL */}
+        <AnimatePresence>
+          {showSuccess && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }} 
+                animate={{ scale: 1, y: 0 }} 
+                className="bg-sky-500 text-black p-8 rounded-[40px] w-full max-w-sm text-center shadow-[0_20px_50px_rgba(56,189,248,0.5)]"
+              >
+                <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Zap className="text-sky-400" size={40} />
+                </div>
+                <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2">Crushed It!</h2>
+                <p className="font-bold uppercase tracking-widest text-[10px] mb-8 opacity-80">{activeProgram.title} Complete</p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="bg-black/10 p-4 rounded-2xl">
+                    <div className="text-2xl font-black italic">{workoutList.length}</div>
+                    <div className="text-[10px] font-bold uppercase opacity-60">Exercises</div>
+                  </div>
+                  <div className="bg-black/10 p-4 rounded-2xl">
+                    <div className="text-2xl font-black italic">100%</div>
+                    <div className="text-[10px] font-bold uppercase opacity-60">Complete</div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => {
+                    setShowWorkouts(false);
+                    setShowSuccess(false);
+                    setCompleted([]); // Resets circles for the next session
+                  }}
+                  className="w-full py-4 bg-black text-white font-black rounded-full uppercase italic hover:scale-105 transition-all"
+                >
+                  Return to Home
+                </button>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
