@@ -2,19 +2,27 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, ChevronRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { copy, clientPrograms, trainingSchedules } from './AriLogic';
-import { useLocalStorage } from "./useLocalStorage"; // 1. Added this import
+import { useLocalStorage } from "./useLocalStorage"; 
 
 const App = () => {
-  // 2. Swapped useState for useLocalStorage
   const [lang, setLang] = useLocalStorage<"en" | "es">("glutesync_lang", "en");
   const [activeId, setActiveId] = useLocalStorage("glutesync_active_id", clientPrograms[0].id);
-  
-  // Keep this as regular useState since we usually want the app to reset to the home screen on refresh
   const [showWorkouts, setShowWorkouts] = useState(false); 
+
+  // --- NEW: Storage for completed exercises ---
+  const [completed, setCompleted] = useLocalStorage<string[]>("glutesync_completed", []);
+
+  const toggleExercise = (exerciseKey: string) => {
+    setCompleted(prev => 
+      prev.includes(exerciseKey) 
+        ? prev.filter(id => id !== exerciseKey) 
+        : [...prev, exerciseKey]
+    );
+  };
+  // --------------------------------------------
 
   const t = copy[lang] || copy.en;
   const activeProgram = clientPrograms.find(p => p.id === activeId) || clientPrograms[0];
-  
   const workoutData = trainingSchedules[activeProgram.days] || [];
 
   return (
@@ -79,15 +87,26 @@ const App = () => {
                       <h3 className="text-2xl font-black text-sky-300 uppercase italic">{day.title || `Day ${idx + 1}`}</h3>
                     </div>
                     <div className="space-y-4">
-                      {day.exercises?.map((ex, exIdx) => (
-                        <div key={exIdx} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                          <div>
-                            <div className="font-bold text-lg">{ex.name}</div>
-                            <div className="text-sm text-gray-400">{ex.sets} Sets</div>
+                      {day.exercises?.map((ex, exIdx) => {
+                        // Create a unique key for this specific exercise
+                        const exerciseKey = `${activeId}-${day.title}-${ex.name}`;
+                        const isCompleted = completed.includes(exerciseKey);
+
+                        return (
+                          <div key={exIdx} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                            <div>
+                              <div className={`font-bold text-lg ${isCompleted ? 'text-gray-500 line-through' : 'text-white'}`}>
+                                {ex.name}
+                              </div>
+                              <div className="text-sm text-gray-400">{ex.sets} Sets</div>
+                            </div>
+                            <CheckCircle2 
+                              onClick={() => toggleExercise(exerciseKey)}
+                              className={`cursor-pointer transition-all ${isCompleted ? "text-sky-400 scale-110" : "text-white/20 hover:text-sky-400"}`} 
+                            />
                           </div>
-                          <CheckCircle2 className="text-white/20 hover:text-sky-400 cursor-pointer" />
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
