@@ -10,17 +10,17 @@ const App = () => {
   const [showWorkouts, setShowWorkouts] = useState(false); 
   const [completed, setCompleted] = useLocalStorage<string[]>("glutesync_completed", []);
 
-  // --- NEW CODE: 1. The Voice Function ---
-  // This tells the browser how to speak (Ari's voice)
+  // 1. The Voice Function
   const speakCoaching = (text: string) => {
+    // Cancel any current speech so it doesn't get "queued up" if you click fast
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang === "es" ? "es-MX" : "en-US";
     utterance.rate = 0.9; 
     window.speechSynthesis.speak(utterance);
   };
 
-  // --- NEW CODE: 2. The Updated Toggle Logic ---
-  // This saves the checkmark AND triggers the voice
+  // 2. The Updated Toggle Logic
   const toggleExercise = (exerciseKey: string, exerciseName: string) => {
     const isNowCompleted = !completed.includes(exerciseKey);
     
@@ -37,8 +37,14 @@ const App = () => {
   };
 
   const t = copy[lang] || copy.en;
+  
+  // Find the current program based on the ID
   const activeProgram = clientPrograms.find(p => p.id === activeId) || clientPrograms[0];
-  const workoutData = trainingSchedules[activeProgram.days] || [];
+  
+  // FIXED: Accessing the schedule by the VARIANT (e.g., 'beginner') instead of days
+  // We also check for '.workouts' since that's where the list lives
+  const selectedSchedule = (trainingSchedules as any)[activeProgram.planVariant];
+  const workoutData = selectedSchedule?.workouts || [];
 
   return (
     <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden">
@@ -88,12 +94,15 @@ const App = () => {
             <motion.section key="workouts" initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="p-6 md:p-12 max-w-4xl mx-auto w-full">
               <h2 className="text-4xl font-black uppercase italic mb-8">Your {activeProgram.days}-Day Routine</h2>
               <div className="space-y-6">
-                {workoutData.map((day, idx) => (
-                  <div key={idx} className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:border-sky-400/50 transition-colors">
-                    <h3 className="text-2xl font-black text-sky-300 uppercase italic mb-4">{day.title || `Day ${idx + 1}`}</h3>
+                {/* Check if there is data, if not, show a message */}
+                {workoutData.length > 0 ? (
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:border-sky-400/50 transition-colors">
+                    <h3 className="text-2xl font-black text-sky-300 uppercase italic mb-4">
+                      {selectedSchedule?.title || "Routine"}
+                    </h3>
                     <div className="space-y-4">
-                      {day.exercises?.map((ex, exIdx) => {
-                        const exerciseKey = `${activeId}-${day.title}-${ex.name}`;
+                      {workoutData.map((ex: any, exIdx: number) => {
+                        const exerciseKey = `${activeId}-${ex.name}`;
                         const isCompleted = completed.includes(exerciseKey);
 
                         return (
@@ -102,9 +111,8 @@ const App = () => {
                               <div className={`font-bold text-lg ${isCompleted ? 'text-gray-500 line-through' : 'text-white'}`}>
                                 {ex.name}
                               </div>
-                              <div className="text-sm text-gray-400">{ex.sets} Sets</div>
+                              <div className="text-sm text-gray-400">{ex.sets} Sets • {ex.reps} Reps</div>
                             </div>
-                            {/* --- 3. The Click Trigger --- */}
                             <CheckCircle2 
                               onClick={() => toggleExercise(exerciseKey, ex.name)}
                               className={`cursor-pointer transition-all ${isCompleted ? "text-sky-400 scale-110" : "text-white/20 hover:text-sky-400"}`} 
@@ -114,7 +122,11 @@ const App = () => {
                       })}
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="text-center py-20 text-gray-500 font-bold uppercase">
+                    Workout data coming soon...
+                  </div>
+                )}
               </div>
             </motion.section>
           )}
