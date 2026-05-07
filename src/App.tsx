@@ -226,3 +226,11 @@ const App = () => {
                 <button onClick={() => setTimeLeft(null)} className="bg-black text-white px-6 py-2 rounded-full font-black uppercase text-xs">Skip</button>
               </div>
             </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+    </div>
+  );
+};
+
+export default App;
