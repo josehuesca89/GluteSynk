@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, ChevronRight, ArrowLeft, CheckCircle2, Info } from "lucide-react";
+import { Zap, ChevronRight, ArrowLeft, CheckCircle2, Info, Clock } from "lucide-react";
 import { copy, clientPrograms, trainingSchedules, ariKnowledgeBase } from './AriLogic';
 import { useLocalStorage } from "./useLocalStorage"; 
 
@@ -9,10 +9,10 @@ const App = () => {
   const [activeId, setActiveId] = useLocalStorage("glutesync_active_id", clientPrograms[0].id);
   const [showWorkouts, setShowWorkouts] = useState(false); 
   const [completed, setCompleted] = useLocalStorage<string[]>("glutesync_completed", []);
-  
-  // NEW: State to track which exercise card is expanded
   const [expandedEx, setExpandedEx] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
+  // 1. Define Voice function FIRST so other functions can use it
   const speakCoaching = (text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -20,11 +20,32 @@ const App = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  // 2. Timer logic
+  useEffect(() => {
+    if (timeLeft === null) return;
+    if (timeLeft === 0) {
+      speakCoaching(lang === "en" ? "Rest over. Get back to work!" : "Descanso terminado. ¡A darle!");
+      setTimeLeft(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setTimeLeft(timeLeft - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [timeLeft]);
+
+  // 3. Single Toggle function with Timer logic
   const toggleExercise = (exerciseKey: string, name: string) => {
     const isNowCompleted = !completed.includes(exerciseKey);
     setCompleted(prev => isNowCompleted ? [...prev, exerciseKey] : prev.filter(id => id !== exerciseKey));
+    
     if (isNowCompleted) {
       speakCoaching(lang === "en" ? `Great job on the ${name}!` : `¡Buen trabajo con ${name}!`);
+      setTimeLeft(60); // Starts the 60s rest
+    } else {
+      setTimeLeft(null); // Cancels rest if you uncheck
     }
   };
 
@@ -35,6 +56,7 @@ const App = () => {
 
   return (
     <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden">
+      {/* Background Video */}
       <div className="fixed inset-0 z-0">
         <video className="w-full h-full object-cover opacity-30" autoPlay loop muted playsInline src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4" />
         <div className="absolute inset-0 bg-black/60" />
@@ -55,6 +77,7 @@ const App = () => {
 
         <AnimatePresence mode="wait">
           {!showWorkouts ? (
+            /* HOME SCREEN */
             <motion.section key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-grow flex flex-col items-center justify-center text-center px-6 py-12">
               <h1 className="text-7xl md:text-9xl font-black italic uppercase tracking-tighter leading-none mb-4">{activeProgram.title}</h1>
               <p className="text-xl text-sky-400/80 font-bold uppercase tracking-widest mb-10">{activeProgram.goal}</p>
@@ -73,6 +96,7 @@ const App = () => {
               </div>
             </motion.section>
           ) : (
+            /* WORKOUT SCREEN */
             <motion.section key="workouts" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="p-6 md:p-12 max-w-4xl mx-auto w-full pb-32">
               <h2 className="text-5xl font-black uppercase italic mb-2 tracking-tighter">{activeProgram.title}</h2>
               <p className="text-sky-400 font-bold uppercase tracking-widest text-xs mb-10">{currentSchedule?.title}</p>
@@ -87,7 +111,6 @@ const App = () => {
 
                     return (
                       <div key={i} className={`group rounded-3xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'bg-sky-950/20 border-sky-400/50' : 'bg-white/5 border-white/10'}`}>
-                        {/* Header Area */}
                         <div className="flex items-center justify-between p-6 cursor-pointer" onClick={() => setExpandedEx(isExpanded ? null : exerciseKey)}>
                           <div className="flex-grow">
                             <div className={`font-black text-2xl uppercase italic tracking-tighter transition-all ${isDone ? 'text-gray-600 line-through' : 'text-white'}`}>
@@ -101,7 +124,7 @@ const App = () => {
                           
                           <CheckCircle2 
                             onClick={(e) => {
-                              e.stopPropagation(); // Prevents opening the info card when just checking the box
+                              e.stopPropagation();
                               toggleExercise(exerciseKey, ex.name);
                             }}
                             className={`transition-all duration-500 ${isDone ? "text-sky-400 scale-125 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" : "text-white/10 hover:text-white/30"}`} 
@@ -109,15 +132,9 @@ const App = () => {
                           />
                         </div>
 
-                        {/* Expandable Form Cues */}
                         <AnimatePresence>
                           {isExpanded && details && (
-                            <motion.div 
-                              initial={{ height: 0, opacity: 0 }} 
-                              animate={{ height: 'auto', opacity: 1 }} 
-                              exit={{ height: 0, opacity: 0 }}
-                              className="border-t border-white/5"
-                            >
+                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-white/5">
                               <div className="p-6 bg-black/40 space-y-4">
                                 <div>
                                   <div className="text-[10px] font-black uppercase tracking-widest text-sky-400 mb-2">Ari's Form Cue</div>
@@ -145,6 +162,30 @@ const App = () => {
                 )}
               </div>
             </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Rest Timer */}
+        <AnimatePresence>
+          {timeLeft !== null && (
+            <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md">
+              <div className="bg-sky-500 text-black p-4 rounded-3xl shadow-[0_10px_30px_rgba(56,189,248,0.4)] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-black/20 p-2 rounded-full animate-pulse">
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest leading-none">Rest Period</div>
+                    <div className="text-2xl font-black italic tracking-tighter leading-none">
+                      {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
+                <button onClick={() => setTimeLeft(null)} className="bg-black text-white px-4 py-2 rounded-full text-xs font-black uppercase">
+                  Skip
+                </button>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </main>
