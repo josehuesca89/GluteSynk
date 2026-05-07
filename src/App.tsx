@@ -1,22 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, ChevronRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { copy, clientPrograms, trainingSchedules } from './AriLogic';
+import { useLocalStorage } from "./useLocalStorage"; // 1. Added this import
 
 const App = () => {
-  const [lang, setLang] = useState<"en" | "es">("en");
-  const [activeId, setActiveId] = useState(clientPrograms[0].id);
-  const [showWorkouts, setShowWorkouts] = useState(false); // NEW: Controls the "Advance"
+  // 2. Swapped useState for useLocalStorage
+  const [lang, setLang] = useLocalStorage<"en" | "es">("glutesync_lang", "en");
+  const [activeId, setActiveId] = useLocalStorage("glutesync_active_id", clientPrograms[0].id);
+  
+  // Keep this as regular useState since we usually want the app to reset to the home screen on refresh
+  const [showWorkouts, setShowWorkouts] = useState(false); 
 
   const t = copy[lang] || copy.en;
   const activeProgram = clientPrograms.find(p => p.id === activeId) || clientPrograms[0];
   
-  // Get the actual exercises based on the selected program's day count
   const workoutData = trainingSchedules[activeProgram.days] || [];
 
   return (
     <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden">
-      {/* Background stays the same */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <video className="w-full h-full object-cover opacity-30" autoPlay loop muted playsInline src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4" />
         <div className="absolute inset-0 bg-black/60" />
@@ -37,7 +39,6 @@ const App = () => {
 
         <AnimatePresence mode="wait">
           {!showWorkouts ? (
-            /* HOME VIEW */
             <motion.section 
               key="home"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -49,7 +50,7 @@ const App = () => {
               <p className="text-xl text-gray-400 font-bold mt-4">{activeProgram.goal}</p>
               
               <button 
-                onClick={() => setShowWorkouts(true)} // THIS ADVANCES THE PAGE
+                onClick={() => setShowWorkouts(true)} 
                 className="mt-10 px-10 py-5 bg-sky-400 text-black font-black rounded-full uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
               >
                 {t.cta1} <ChevronRight />
@@ -65,7 +66,6 @@ const App = () => {
               </div>
             </motion.section>
           ) : (
-            /* WORKOUT LIST VIEW (The "Advancement") */
             <motion.section 
               key="workouts"
               initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
