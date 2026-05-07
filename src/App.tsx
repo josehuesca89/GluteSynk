@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, ChevronRight, ArrowLeft, CheckCircle2, Info, Clock } from "lucide-react";
+import { Zap, ChevronRight, ArrowLeft, CheckCircle2, Info, Clock, Trophy, Flame } from "lucide-react";
 import { copy, clientPrograms, trainingSchedules, ariKnowledgeBase } from './AriLogic';
 import { useLocalStorage } from "./useLocalStorage"; 
 
@@ -12,6 +12,11 @@ const App = () => {
   const [expandedEx, setExpandedEx] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // --- NEW LOGIC EXPANSION STATES ---
+  const [totalWorkouts, setTotalWorkouts] = useLocalStorage("glutesync_total_stats", 0);
+  const [streak, setStreak] = useLocalStorage("glutesync_streak", 0);
+  const [lastDate, setLastDate] = useLocalStorage<string | null>("glutesync_last_date", null);
 
   // 1. Define Voice function
   const speakCoaching = (text: string) => {
@@ -41,11 +46,9 @@ const App = () => {
   const currentSchedule = (trainingSchedules as any)[activeProgram.planVariant];
   const workoutList = currentSchedule?.workouts || [];
 
-  // 3. Updated Toggle function with Success Detection
+  // 3. Updated Toggle function with Progress Tracking
   const toggleExercise = (exerciseKey: string, name: string) => {
     const isNowCompleted = !completed.includes(exerciseKey);
-    
-    // Calculate the updated completed list to check for workout finish
     const newCompleted = isNowCompleted 
       ? [...completed, exerciseKey] 
       : completed.filter(id => id !== exerciseKey);
@@ -53,16 +56,35 @@ const App = () => {
     setCompleted(newCompleted);
     
     if (isNowCompleted) {
-      // Check if all exercises in the current list are finished
       const allExerciseKeys = workoutList.map((ex: any) => `${activeId}-${ex.name}`);
       const isWorkoutFinished = allExerciseKeys.every(key => newCompleted.includes(key));
 
       if (isWorkoutFinished) {
-        setTimeLeft(null); // Stop any active timer
+        setTimeLeft(null);
         setShowSuccess(true);
-        speakCoaching(lang === "en" 
-          ? "Workout complete! Amazing job today. You are getting stronger every single day!" 
-          : "¡Entrenamiento completado! Increíble trabajo hoy. ¡Te estás volviendo más fuerte cada día!");
+
+        // --- STATS UPDATE LOGIC ---
+        const today = new Date().toDateString();
+        setTotalWorkouts(prev => prev + 1);
+
+        if (lastDate !== today) {
+          setStreak(prev => prev + 1);
+          setLastDate(today);
+        }
+
+        // --- DYNAMIC COACHING ---
+        let speech = "";
+        const nextTotal = totalWorkouts + 1;
+        
+        if (nextTotal === 1) {
+          speech = lang === "en" ? "First workout down! The journey starts now." : "¡Primer entrenamiento listo! El viaje comienza ahora.";
+        } else if (nextTotal % 5 === 0) {
+          speech = lang === "en" ? `That's ${nextTotal} workouts! Your consistency is unmatched.` : `¡Ya son ${nextTotal} entrenamientos! Tu consistencia no tiene rival.`;
+        } else {
+          speech = lang === "en" ? "Workout complete! You're building the body you want." : "¡Entrenamiento completado! Estás construyendo el cuerpo que quieres.";
+        }
+        speakCoaching(speech);
+
       } else {
         speakCoaching(lang === "en" ? `Great job on the ${name}!` : `¡Buen trabajo con ${name}!`);
         setTimeLeft(60); 
@@ -76,7 +98,6 @@ const App = () => {
 
   return (
     <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden">
-      {/* Background Video */}
       <div className="fixed inset-0 z-0">
         <video className="w-full h-full object-cover opacity-30" autoPlay loop muted playsInline src="https://videos.pexels.com/video-files/4367572/4367572-hd_1920_1080_30fps.mp4" />
         <div className="absolute inset-0 bg-black/60" />
@@ -98,6 +119,20 @@ const App = () => {
         <AnimatePresence mode="wait">
           {!showWorkouts ? (
             <motion.section key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-grow flex flex-col items-center justify-center text-center px-6 py-12">
+              
+              {/* --- PROGRESS PEEK --- */}
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex gap-4 bg-white/5 border border-white/10 px-6 py-2 rounded-full backdrop-blur-sm">
+                <div className="flex items-center gap-2">
+                  <Trophy size={14} className="text-sky-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{totalWorkouts} Workouts</span>
+                </div>
+                <div className="w-[1px] h-3 bg-white/20 self-center" />
+                <div className="flex items-center gap-2">
+                  <Flame size={14} className="text-orange-500" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">{streak} Day Streak</span>
+                </div>
+              </motion.div>
+
               <h1 className="text-7xl md:text-9xl font-black italic uppercase tracking-tighter leading-none mb-4">{activeProgram.title}</h1>
               <p className="text-xl text-sky-400/80 font-bold uppercase tracking-widest mb-10">{activeProgram.goal}</p>
               
@@ -158,98 +193,4 @@ const App = () => {
                               </div>
                               {details.commonMistakes && (
                                 <div>
-                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Watch Out For</div>
-                                  <ul className="text-sm text-gray-400 space-y-1 italic">
-                                    {details.commonMistakes.map((m: string, idx: number) => (
-                                      <li key={idx}>• {m}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* Floating Rest Timer */}
-        <AnimatePresence>
-          {timeLeft !== null && (
-            <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md">
-              <div className="bg-sky-500 text-black p-4 rounded-3xl shadow-[0_10px_30px_rgba(56,189,248,0.4)] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-black/20 p-2 rounded-full animate-pulse">
-                    <Clock size={20} />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest leading-none">Rest Period</div>
-                    <div className="text-2xl font-black italic tracking-tighter leading-none">
-                      {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
-                    </div>
-                  </div>
-                </div>
-                <button onClick={() => setTimeLeft(null)} className="bg-black text-white px-4 py-2 rounded-full text-xs font-black uppercase">
-                  Skip
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* SUCCESS MODAL */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
-            >
-              <motion.div 
-                initial={{ scale: 0.9, y: 20 }} 
-                animate={{ scale: 1, y: 0 }} 
-                className="bg-sky-500 text-black p-8 rounded-[40px] w-full max-w-sm text-center shadow-[0_20px_50px_rgba(56,189,248,0.5)]"
-              >
-                <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Zap className="text-sky-400" size={40} />
-                </div>
-                <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2">Crushed It!</h2>
-                <p className="font-bold uppercase tracking-widest text-[10px] mb-8 opacity-80">{activeProgram.title} Complete</p>
-                
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-black/10 p-4 rounded-2xl">
-                    <div className="text-2xl font-black italic">{workoutList.length}</div>
-                    <div className="text-[10px] font-bold uppercase opacity-60">Exercises</div>
-                  </div>
-                  <div className="bg-black/10 p-4 rounded-2xl">
-                    <div className="text-2xl font-black italic">100%</div>
-                    <div className="text-[10px] font-bold uppercase opacity-60">Complete</div>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={() => {
-                    setShowWorkouts(false);
-                    setShowSuccess(false);
-                    setCompleted([]); // Resets circles for the next session
-                  }}
-                  className="w-full py-4 bg-black text-white font-black rounded-full uppercase italic hover:scale-105 transition-all"
-                >
-                  Return to Home
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-    </div>
-  );
-};
-
-export default App;
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Watch Out
