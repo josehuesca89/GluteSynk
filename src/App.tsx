@@ -192,20 +192,19 @@ const App = () => {
                                 <p className="text-sm text-gray-300 leading-relaxed font-medium">{details.form}</p>
                               </div>
 {details.commonMistakes && (
-                                <div>
-                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">
-                                    Watch Out
-                                  </div>
-                                  <ul className="space-y-2">
-                                    {details.commonMistakes.map((mistake: string, idx: number) => (
-                                      <li key={idx} className="text-sm text-gray-400 flex gap-2">
-                                        <span className="text-red-400">•</span> {mistake}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
+  <div className="mt-4">
+    <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">
+      Watch Out
+    </div>
+    <ul className="space-y-2">
+      {details.commonMistakes.map((mistake: string, idx: number) => (
+        <li key={idx} className="text-sm text-gray-400 flex gap-2">
+          <span className="text-red-400">•</span> {mistake}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
                           </motion.div>
                         )}
                       </AnimatePresence>
