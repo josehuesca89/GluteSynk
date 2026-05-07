@@ -26,19 +26,13 @@ const App = () => {
   const activeProgram = clientPrograms.find(p => p.id === activeId) ?? clientPrograms[0];
   const workoutList = (trainingSchedules as any)[activeProgram.planVariant]?.workouts ?? [];
 
+  // --- VOICE FUNCTION ---
   const speakText = (text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang === "es" ? "es-MX" : "en-US";
     window.speechSynthesis.speak(utterance);
   };
-
-  useEffect(() => {
-    if (timeLeft === 0) { speakText(lang === "en" ? "Rest over!" : "¡Descanso terminado!"); setTimeLeft(null); }
-    if (!timeLeft) return;
-    const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [timeLeft, lang]);
 
   const handleChat = async () => {
     if (!input.trim() || isTyping) return;
@@ -54,14 +48,16 @@ const App = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: newMessages,
-          systemPrompt: `You are Ari, a fitness coach. Keep answers short. Lang: ${lang}.`
+          systemPrompt: `You are Ari, an elite glute coach. Keep responses under 3 sentences. Lang: ${lang}.`
         })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      
       setMessages([...newMessages, { role: "assistant", content: data.content }]);
+      speakText(data.content); // Ari speaks automatically
     } catch (e: any) {
-      setMessages([...newMessages, { role: "assistant", content: `Offline: ${e.message}` }]);
+      setMessages([...newMessages, { role: "assistant", content: `Ari is offline: ${e.message}` }]);
     } finally { setIsTyping(false); }
   };
 
@@ -87,11 +83,11 @@ const App = () => {
           {!showWorkouts ? (
             <motion.section key="home" className="flex-grow flex flex-col items-center justify-center text-center px-6 py-12">
               <h1 className="text-6xl md:text-8xl font-black italic uppercase mb-8">{activeProgram.title}</h1>
-              <button onClick={() => setShowWorkouts(true)} className="px-12 py-6 bg-sky-400 text-black font-black rounded-full uppercase italic mb-12">Start Workout</button>
+              <button onClick={() => setShowWorkouts(true)} className="px-12 py-6 bg-sky-400 text-black font-black rounded-full uppercase italic mb-12 shadow-lg shadow-sky-400/20">Start Workout</button>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
                 {clientPrograms.map(p => (
-                  <button key={p.id} onClick={() => setActiveId(p.id)} className={`p-6 rounded-3xl border-2 transition-all ${activeId === p.id ? "border-sky-400 bg-sky-400/10" : "border-white/10"}`}>
-                    <div className="text-xl font-black italic uppercase">{p.title}</div>
+                  <button key={p.id} onClick={() => setActiveId(p.id)} className={`p-6 rounded-3xl border-2 transition-all ${activeId === p.id ? "border-sky-400 bg-sky-400/10 shadow-[0_0_15px_rgba(56,189,248,0.2)]" : "border-white/10"}`}>
+                    <div className="text-xl font-black italic uppercase tracking-tighter">{p.title}</div>
                   </button>
                 ))}
               </div>
@@ -104,10 +100,10 @@ const App = () => {
                    const key = `${activeId}-${ex.name}`;
                    const isDone = completed.includes(key);
                    return (
-                     <div key={i} className="bg-white/5 border border-white/10 p-6 rounded-3xl flex justify-between items-center">
+                     <div key={i} className="bg-white/5 border border-white/10 p-6 rounded-3xl flex justify-between items-center transition-all hover:bg-white/10">
                         <div>
-                          <div className={`text-2xl font-black uppercase italic ${isDone ? 'text-gray-600 line-through' : ''}`}>{ex.name}</div>
-                          <div className="text-sky-400 font-bold uppercase text-[10px]">{ex.sets} Sets</div>
+                          <div className={`text-2xl font-black uppercase italic tracking-tighter ${isDone ? 'text-gray-600 line-through' : ''}`}>{ex.name}</div>
+                          <div className="text-sky-400 font-bold uppercase text-[10px] tracking-widest">{ex.sets} Sets</div>
                         </div>
                         <CheckCircle2 onClick={() => toggleExercise(key)} className={isDone ? 'text-sky-400' : 'text-white/10'} size={32} />
                      </div>
@@ -118,37 +114,34 @@ const App = () => {
           )}
         </AnimatePresence>
 
-        {/* --- CHAT --- */}
-        {!showChat && <button onClick={() => setShowChat(true)} className="fixed bottom-8 right-6 w-16 h-16 bg-sky-400 rounded-full flex items-center justify-center shadow-lg"><MessageCircle size={24} className="text-black"/></button>}
+        {/* --- CHAT MODAL --- */}
+        {!showChat && <button onClick={() => setShowChat(true)} className="fixed bottom-8 right-6 w-16 h-16 bg-sky-400 rounded-full flex items-center justify-center shadow-lg shadow-sky-400/20 hover:scale-110 transition-all z-[200]"><MessageCircle size={24} className="text-black"/></button>}
+        
         <AnimatePresence>
           {showChat && (
             <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="fixed inset-0 z-[300] bg-black flex flex-col">
-               <div className="p-6 border-b border-white/10 flex justify-between items-center"><span className="font-black uppercase text-sky-400">Ari AI</span><X onClick={() => setShowChat(false)} className="text-white/40 cursor-pointer"/></div>
+               <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/50 backdrop-blur-md">
+                 <div className="flex items-center gap-2 text-sky-400"><Sparkles size={20}/><span className="font-black uppercase tracking-widest">Ari AI</span></div>
+                 <X onClick={() => setShowChat(false)} className="text-white/40 cursor-pointer hover:text-white transition-colors"/>
+               </div>
                <div className="flex-grow overflow-y-auto p-6 space-y-4">
                  {messages.map((m, i) => (
                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                     <div className={`max-w-[80%] p-4 rounded-2xl text-sm ${m.role === 'user' ? 'bg-sky-400 text-black' : 'bg-white/10 text-white'}`}>
+                     <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-medium ${m.role === 'user' ? 'bg-sky-400 text-black rounded-br-none' : 'bg-white/10 text-white rounded-bl-none'}`}>
                        {m.content}
-                       {m.role === 'assistant' && <Volume2 size={14} className="mt-2 cursor-pointer opacity-50" onClick={() => speakText(m.content)} />}
+                       {m.role === 'assistant' && <Volume2 size={14} className="mt-2 cursor-pointer opacity-50 hover:opacity-100" onClick={() => speakText(m.content)} />}
                      </div>
                    </div>
                  ))}
-                 {isTyping && <Loader2 className="animate-spin text-sky-400 m-4" />}
+                 {isTyping && <div className="flex justify-start"><Loader2 className="animate-spin text-sky-400 m-4" /></div>}
                </div>
-               <div className="p-6 border-t border-white/10 flex gap-4">
-                 <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleChat()} placeholder="Ask Ari..." className="flex-grow bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm" />
-                 <button onClick={handleChat} className="w-14 h-14 bg-sky-400 rounded-full flex items-center justify-center text-black"><Send size={20}/></button>
+               <div className="p-6 border-t border-white/10 flex gap-4 bg-black">
+                 <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleChat()} placeholder="Ask Ari..." className="flex-grow bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm focus:outline-none focus:border-sky-400" />
+                 <button onClick={handleChat} disabled={!input.trim() || isTyping} className="w-14 h-14 bg-sky-400 rounded-full flex items-center justify-center text-black shadow-lg shadow-sky-400/20 disabled:opacity-50 transition-all"><Send size={20}/></button>
                </div>
             </motion.div>
           )}
         </AnimatePresence>
-        
-        {timeLeft !== null && (
-          <div className="fixed bottom-6 left-6 right-6 z-[200] bg-sky-400 text-black p-4 rounded-2xl flex justify-between items-center font-black uppercase">
-            <span>Rest: {timeLeft}s</span>
-            <button onClick={() => setTimeLeft(null)} className="text-[10px] border border-black px-2 py-1 rounded">Skip</button>
-          </div>
-        )}
       </main>
     </div>
   );
