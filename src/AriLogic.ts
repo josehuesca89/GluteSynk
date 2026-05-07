@@ -142,13 +142,20 @@ export const ariKnowledgeBase = {
     }
   },
 
-  // Exercise Database with Form Cues
+// Exercise Database with Form Cues
   exercises: {
     "Hip Thrust": {
       form: "Ribs down, chin tucked, full lockout at top, 2-second squeeze. Drive through heels.",
       commonMistakes: ["Overextending lower back", "Not reaching full lockout", "Using too much momentum"],
       benefits: "Primary glute builder - maximum glute activation",
       alternatives: ["Single-leg hip thrust", "Dumbbell hip thrust", "Glute bridge"]
+    },
+    // ADD THIS SECTION RIGHT HERE:
+    "Glute Bridge": {
+      form: "Lie on your back with feet flat and hip-width apart. Drive through your heels to lift your hips toward the ceiling. Squeeze your glutes hard at the top for 2 seconds.",
+      commonMistakes: ["Arching the lower back instead of tucking the tailbone", "Pushing through the toes", "Not squeezing at the top"],
+      benefits: "Excellent for mind-muscle connection and glute isolation.",
+      alternatives: ["Hip Thrust", "Single-Leg Glute Bridge"]
     },
     "Back Squat": {
       form: "Feet shoulder-width, knees tracking over toes, chest up, descend with control to parallel or below.",
