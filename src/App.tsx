@@ -191,6 +191,89 @@ const App = () => {
                                 <div className="text-[10px] font-black uppercase tracking-widest text-sky-400 mb-2">Ari's Form Cue</div>
                                 <p className="text-sm text-gray-300 leading-relaxed font-medium">{details.form}</p>
                               </div>
-                              {details.commonMistakes && (
+{details.commonMistakes && (
                                 <div>
-                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Watch Out
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">
+                                    Watch Out
+                                  </div>
+                                  <ul className="space-y-2">
+                                    {details.commonMistakes.map((mistake: string, idx: number) => (
+                                      <li key={idx} className="text-sm text-gray-400 flex gap-2">
+                                        <span className="text-red-400">•</span> {mistake}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* --- TIMER OVERLAY --- */}
+        <AnimatePresence>
+          {timeLeft !== null && (
+            <motion.div 
+              initial={{ y: 100 }} 
+              animate={{ y: 0 }} 
+              exit={{ y: 100 }} 
+              className="fixed bottom-0 left-0 right-0 p-6 z-[200] bg-gradient-to-t from-black via-black to-transparent"
+            >
+              <div className="max-w-4xl mx-auto bg-sky-400 text-black p-4 rounded-3xl flex items-center justify-between shadow-[0_-10px_30px_rgba(56,189,248,0.3)]">
+                <div className="flex items-center gap-4 px-4">
+                  <Clock className="animate-pulse" />
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-70">Rest Timer</div>
+                    <div className="text-2xl font-black italic tracking-tighter">{timeLeft}s</div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setTimeLeft(null)} 
+                  className="bg-black text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest"
+                >
+                  Skip
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* --- SUCCESS OVERLAY --- */}
+        <AnimatePresence>
+          {showSuccess && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center"
+            >
+              <motion.div 
+                initial={{ scale: 0.5 }} 
+                animate={{ scale: 1 }} 
+                className="w-24 h-24 bg-sky-400 rounded-full flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(56,189,248,0.5)]"
+              >
+                <Trophy size={48} className="text-black" />
+              </motion.div>
+              <h2 className="text-6xl font-black italic uppercase tracking-tighter mb-4">Workout Done!</h2>
+              <p className="text-sky-400 font-bold uppercase tracking-widest mb-12">Building that body, one rep at a time.</p>
+              <button 
+                onClick={() => { setShowSuccess(false); setShowWorkouts(false); setCompleted([]); }} 
+                className="px-12 py-6 bg-white text-black font-black rounded-full uppercase italic hover:scale-105 transition-all"
+              >
+                Go Home
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+    </div>
+  );
+};
+
+export default App;
