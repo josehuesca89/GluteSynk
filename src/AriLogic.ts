@@ -647,15 +647,33 @@ export const clientPrograms = [
 export const trainingSchedules = {
   beginner: {
     title: "Beginner 3-Day Split",
-    description: "Focus on form and consistent glute activation."
+    description: "Focus on form and consistent glute activation.",
+    workouts: [
+      { name: "Hip Thrust", sets: "3", reps: "10-12", rest: "90s" },
+      { name: "Back Squat", sets: "3", reps: "12", rest: "90s" },
+      { name: "Glute Bridge", sets: "3", reps: "15", rest: "60s" }
+    ]
   },
   intermediate: {
     title: "Intermediate 5-Day Power",
-    description: "Increased volume with progressive overload focus."
+    description: "Increased volume with progressive overload focus.",
+    workouts: [
+      { name: "Hip Thrust", sets: "4", reps: "8", rest: "2min" },
+      { name: "RDL", sets: "3", reps: "10", rest: "90s" },
+      { name: "Bulgarian Split Squat", sets: "3", reps: "8/side", rest: "90s" },
+      { name: "Back Squat", sets: "3", reps: "10", rest: "2min" }
+    ]
   },
   advanced: {
     title: "Advanced 6-Day Elite",
-    description: "High-intensity frequency for maximum muscle growth."
+    description: "High-intensity frequency for maximum muscle growth.",
+    workouts: [
+      { name: "Hip Thrust", sets: "5", reps: "6-8", rest: "2min" },
+      { name: "Back Squat", sets: "4", reps: "8", rest: "2min" },
+      { name: "RDL", sets: "4", reps: "8", rest: "2min" },
+      { name: "Bulgarian Split Squat", sets: "4", reps: "10/side", rest: "90s" },
+      { name: "Leg Press", sets: "3", reps: "12", rest: "90s" }
+    ]
   }
 };
 
