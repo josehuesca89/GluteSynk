@@ -167,7 +167,15 @@ const App = () => {
                  {isTyping && <div className="flex justify-start"><Loader2 className="animate-spin text-sky-400 m-4" /></div>}
                </div>
                <div className="p-6 border-t border-white/10 flex gap-4 bg-black">
-                 <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleChat()} placeholder="Ask Ari..." className="flex-grow bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm focus:outline-none focus:border-sky-400" />
+                <input 
+  id="ari-chat-input"
+  name="ari-chat-input"
+  value={input} 
+  onChange={(e) => setInput(e.target.value)} 
+  onKeyDown={(e) => e.key === 'Enter' && handleChat()} 
+  placeholder="Ask Ari..." 
+  className="flex-grow bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm focus:outline-none focus:border-sky-400" 
+/>
                  <button onClick={handleChat} disabled={!input.trim() || isTyping} className="w-14 h-14 bg-sky-400 rounded-full flex items-center justify-center text-black shadow-lg shadow-sky-400/20 disabled:opacity-50 transition-all"><Send size={20}/></button>
                </div>
             </motion.div>
